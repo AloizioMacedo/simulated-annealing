@@ -42,7 +42,7 @@ impl State for Tsp {
         }
     }
 
-    fn get_next_states(&self) -> impl Iterator<Item = Self> + '_ {
+    fn get_next_states(&self) -> impl Iterator<Item = Self> {
         let mut rng = thread_rng();
         let n = self.state.len();
 
