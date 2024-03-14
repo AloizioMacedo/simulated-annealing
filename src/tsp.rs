@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use rand::{seq::SliceRandom, thread_rng};
 
-use crate::state::State;
+use crate::simulated_annealing::State;
 
 #[derive(Debug, Clone)]
 struct Point(f64, f64);
@@ -63,7 +63,7 @@ impl State for Tsp {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::state::simulated_annealing;
+    use crate::simulated_annealing::simulated_annealing;
 
     #[test]
     fn test_distance() {
