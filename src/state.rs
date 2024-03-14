@@ -24,9 +24,13 @@ where
     for k in 0..max_k {
         let t = temperature(k);
 
-        let next_state = state
-            .get_next_states()
-            .find(|next_state| state.acceptability(next_state, t) >= uniform.sample(&mut rng));
+        let next_state = current_state.get_next_states().find(|candidate| {
+            let acceptability = current_state.acceptability(candidate, t);
+            let sampling = uniform.sample(&mut rng);
+
+            println!("acceptability: {acceptability}, sampling: {sampling}");
+            acceptability >= sampling
+        });
 
         if let Some(next_state) = next_state {
             current_state = next_state;
