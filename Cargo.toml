@@ -9,3 +9,6 @@ edition = "2021"
 anyhow = "1.0.81"
 itertools = "0.12.1"
 rand = "0.8.5"
+
+[dev-dependencies]
+num = "0.4.1"

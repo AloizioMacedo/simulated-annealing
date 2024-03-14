@@ -79,7 +79,7 @@ mod tests {
     }
 
     #[test]
-    fn test() {
+    fn test_tsp() {
         let state = vec![
             Point(0.0, 0.0),
             Point(0.0, 2.0),
@@ -111,6 +111,42 @@ mod tests {
                 "error of {error} from final_state energy '{}' to '{}'. States are: {:?}",
                 final_state.energy(),
                 correct_result.energy(),
+                final_state.state,
+            )
+        }
+    }
+
+    #[test]
+    fn test_big_polygon() {
+        let n_vertices = 20;
+
+        let z =
+            num::complex::Complex::from_polar(1.0, 2.0 * std::f64::consts::PI / n_vertices as f64);
+
+        let state: Vec<_> = (0..n_vertices)
+            .map(|i| z.powi(i))
+            .map(|z| Point(z.re, z.im))
+            .collect();
+
+        let mut tsp = Tsp { state };
+
+        let best_energy = tsp.energy();
+
+        let mut rng = thread_rng();
+        tsp.state.shuffle(&mut rng);
+
+        let energy_after_shuffle = tsp.energy();
+        println!("energy after shuffling: {energy_after_shuffle}");
+
+        let final_state = simulated_annealing(&tsp, 10_000, |k| 1.0 - (0.0001 * k as f64));
+
+        let error = (best_energy - final_state.energy()).abs();
+
+        if error > 0.0001 {
+            panic!(
+                "error of {error} from final_state energy '{}' to '{}'. States are: {:?}",
+                final_state.energy(),
+                best_energy,
                 final_state.state,
             )
         }
