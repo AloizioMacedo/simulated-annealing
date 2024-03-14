@@ -28,7 +28,6 @@ where
             let acceptability = current_state.acceptability(candidate, t);
             let sampling = uniform.sample(&mut rng);
 
-            println!("acceptability: {acceptability}, sampling: {sampling}");
             acceptability >= sampling
         });
 
