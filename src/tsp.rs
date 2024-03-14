@@ -63,7 +63,7 @@ impl State for Tsp {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::simulated_annealing::simulated_annealing;
+    use crate::simulated_annealing::SimulatedAnnealing;
 
     #[test]
     fn test_distance() {
@@ -91,7 +91,9 @@ mod tests {
 
         let tsp = Tsp { state };
 
-        let final_state = simulated_annealing(&tsp, 100, |k| 1.0 - (0.01 * k as f64));
+        let sa = SimulatedAnnealing::new();
+
+        let final_state = sa.run(&tsp);
 
         let correct_result = Tsp {
             state: vec![
@@ -138,7 +140,10 @@ mod tests {
         let energy_after_shuffle = tsp.energy();
         println!("energy after shuffling: {energy_after_shuffle}");
 
-        let final_state = simulated_annealing(&tsp, 10_000, |k| 1.0 - (0.0001 * k as f64));
+        let sa = SimulatedAnnealing::new()
+            .with_temperature_and_max_iter(|k| 1.0 - 0.001 * k as f64, 1000);
+
+        let final_state = sa.run(&tsp);
 
         let error = (best_energy - final_state.energy()).abs();
 
