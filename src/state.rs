@@ -3,7 +3,7 @@ use rand::{
     thread_rng,
 };
 
-trait State {
+pub trait State {
     fn acceptability(&self, new: &Self, t: f64) -> f64;
 
     fn get_next_states(&self) -> impl Iterator<Item = Self>
@@ -11,7 +11,7 @@ trait State {
         Self: Clone;
 }
 
-fn simulated_annealing<S, T>(state: &S, max_k: usize, temperature: T) -> S
+pub fn simulated_annealing<S, T>(state: &S, max_k: usize, temperature: T) -> S
 where
     S: State + Clone,
     T: Fn(usize) -> f64,
@@ -36,8 +36,4 @@ where
     }
 
     current_state
-}
-
-fn main() {
-    println!("Hello, world!");
 }
