@@ -25,10 +25,7 @@ where
         let t = temperature(k);
 
         let next_state = current_state.get_next_states().find(|candidate| {
-            let acceptability = current_state.acceptability(candidate, t);
-            let sampling = uniform.sample(&mut rng);
-
-            acceptability >= sampling
+            current_state.acceptability(candidate, t) >= uniform.sample(&mut rng)
         });
 
         if let Some(next_state) = next_state {
