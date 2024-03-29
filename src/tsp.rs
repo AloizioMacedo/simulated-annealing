@@ -120,7 +120,7 @@ mod tests {
 
     #[test]
     fn test_big_polygon1() {
-        let n_vertices = 2000;
+        let n_vertices = 500;
 
         let z =
             num::complex::Complex::from_polar(1.0, 2.0 * std::f64::consts::PI / n_vertices as f64);

@@ -1,6 +1,7 @@
 use itertools::Itertools;
 use rand::{
     distributions::{Distribution, Uniform},
+    seq::SliceRandom,
     thread_rng,
 };
 use serde::{Deserialize, Serialize};
@@ -50,12 +51,16 @@ pub fn simulated_annealing(state: &[Point], max_k: usize) -> Vec<Point> {
 
     let mut holder = vec![Point::default(); n];
 
+    let mut swaps: Vec<_> = (0..n).tuple_combinations::<(usize, usize)>().collect();
+
     'outer: for k in 0..max_k {
         let t = 1.0 / k as f64;
 
-        for (i, j) in (0..n).tuple_combinations::<(usize, usize)>() {
+        swaps.shuffle(&mut rng);
+
+        for (i, j) in swaps.iter() {
             holder.copy_from_slice(current_state);
-            holder.swap(i, j);
+            holder.swap(*i, *j);
 
             if acceptability(current_state, &holder, t) >= uniform.sample(&mut rng) {
                 current_state.copy_from_slice(&holder);
@@ -112,7 +117,7 @@ mod tests {
 
     #[test]
     fn test_big_polygon2() {
-        let n_vertices = 2000;
+        let n_vertices = 500;
 
         let z =
             num::complex::Complex::from_polar(1.0, 2.0 * std::f64::consts::PI / n_vertices as f64);

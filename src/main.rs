@@ -18,7 +18,7 @@ async fn handler(ws: WebSocketUpgrade) -> Response {
 }
 
 async fn handle_socket(mut socket: WebSocket) {
-    let n_vertices = 100;
+    let n_vertices = 30;
 
     let z = num::Complex::from_polar(1.0, 2.0 * std::f64::consts::PI / n_vertices as f64);
 
@@ -37,27 +37,30 @@ async fn handle_socket(mut socket: WebSocket) {
     let n = current_state.len();
 
     let mut holder = vec![Point::default(); n];
+    let mut tuple_combs = (0..n).tuple_combinations::<(usize, usize)>().collect_vec();
 
-    'outer: for k in 0..3000 {
-        let t = 1.0 / k as f64;
+    'outer: for k in 0..5000 {
+        let t = 20.0 / k as f64;
 
-        for (i, j) in (0..n).tuple_combinations::<(usize, usize)>() {
+        tuple_combs.shuffle(&mut rng);
+
+        for (i, j) in tuple_combs.iter() {
             holder.copy_from_slice(current_state);
-            holder.swap(i, j);
+            holder.swap(*i, *j);
 
             if acceptability(current_state, &holder, t) >= uniform.sample(&mut rng) {
                 current_state.copy_from_slice(&holder);
+
+                let jsonified = json!(Tsp {
+                    points: current_state.to_vec(),
+                });
+
+                socket
+                    .send(axum::extract::ws::Message::Text(jsonified.to_string()))
+                    .await
+                    .unwrap();
                 continue 'outer;
             }
-
-            let jsonified = json!(Tsp {
-                points: current_state.to_vec(),
-            });
-
-            socket
-                .send(axum::extract::ws::Message::Text(jsonified.to_string()))
-                .await
-                .unwrap()
         }
 
         break;
