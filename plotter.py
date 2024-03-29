@@ -2,17 +2,17 @@ import json
 import plotly.graph_objects as go
 from websockets.sync.client import connect
 from dash import Dash, html, dcc, callback, Input, Output
+import plotly.express as px
 
 
-f = go.FigureWidget()
-f.add_scatter(x=[0, 1], y=[0, 1])
+f = px.scatter(x=[1], y=[1])
 f.update_traces(mode="markers+lines")
 f.layout.title = "TSP"
 
 
 app = Dash()
 app.layout = html.Div(
-    [dcc.Graph(id="figure", figure=f), dcc.Interval(id="interval", interval=100)]
+    [dcc.Graph(id="figure", figure=f), dcc.Interval(id="interval", interval=250)]
 )
 
 
@@ -20,18 +20,19 @@ app.layout = html.Div(
     Output(component_id="figure", component_property="figure"),
     Input(component_id="interval", component_property="n_intervals"),
 )
-def hello(value):
+def hello(n_intervals):
     try:
         message = websocket.recv()
         points = json.loads(message)
         x, y = zip(*points["points"])
 
-        f.data[0].x = x
-        f.data[0].y = y
+        f = px.scatter(x=x, y=y)
+        f.update_traces(mode="markers+lines")
 
         return f
-    except Exception:
-        return f
+    except Exception as e:
+        print(e)
+        pass
 
 
 if __name__ == "__main__":
