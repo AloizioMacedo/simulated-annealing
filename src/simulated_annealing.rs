@@ -1,3 +1,4 @@
+use crate::builder::SimulatedAnnealingBuilder;
 use std::ops::Deref;
 
 use rand::{
@@ -14,8 +15,8 @@ pub trait State {
 }
 
 pub struct SimulatedAnnealing {
-    temperature: Box<dyn Fn(usize) -> f64>,
-    max_k: usize,
+    pub(crate) temperature: Box<dyn Fn(usize) -> f64>,
+    pub(crate) max_k: usize,
 }
 
 impl Default for SimulatedAnnealing {
@@ -28,20 +29,12 @@ impl Default for SimulatedAnnealing {
 }
 
 impl SimulatedAnnealing {
-    pub fn new() -> SimulatedAnnealing {
-        SimulatedAnnealing::default()
+    pub fn new() -> Self {
+        Self::default()
     }
 
-    pub fn with_temperature_and_max_iter<T>(self, temperature: T, max_k: usize) -> Self
-    where
-        T: Fn(usize) -> f64 + 'static,
-    {
-        let mut new_self = self;
-
-        new_self.temperature = Box::new(temperature);
-        new_self.max_k = max_k;
-
-        new_self
+    pub fn builder() -> SimulatedAnnealingBuilder {
+        SimulatedAnnealingBuilder::default()
     }
 
     pub fn run<S>(&self, state: &S) -> S
