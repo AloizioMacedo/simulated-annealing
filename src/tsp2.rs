@@ -3,9 +3,15 @@ use rand::{
     distributions::{Distribution, Uniform},
     thread_rng,
 };
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, Clone, Copy)]
-struct Point(f64, f64);
+#[derive(Debug, Default, Clone, Copy, Serialize, Deserialize)]
+pub struct Point(pub f64, pub f64);
+
+#[derive(Serialize, Deserialize)]
+pub struct Tsp {
+    pub points: Vec<Point>,
+}
 
 impl Point {
     fn distance(&self, other: &Self) -> f64 {
@@ -13,7 +19,7 @@ impl Point {
     }
 }
 
-fn energy(points: &[Point]) -> f64 {
+pub fn energy(points: &[Point]) -> f64 {
     points
         .iter()
         .cycle()
@@ -24,7 +30,7 @@ fn energy(points: &[Point]) -> f64 {
         .sum()
 }
 
-fn acceptability(me: &[Point], new: &[Point], t: f64) -> f64 {
+pub fn acceptability(me: &[Point], new: &[Point], t: f64) -> f64 {
     let new_energy = energy(new);
     let my_energy = energy(me);
 
@@ -35,7 +41,7 @@ fn acceptability(me: &[Point], new: &[Point], t: f64) -> f64 {
     }
 }
 
-fn simulated_annealing(state: &[Point], max_k: usize) -> Vec<Point> {
+pub fn simulated_annealing(state: &[Point], max_k: usize) -> Vec<Point> {
     let mut rng = thread_rng();
     let uniform = Uniform::new_inclusive(0.0, 1.0);
 
