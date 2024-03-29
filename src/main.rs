@@ -13,6 +13,25 @@ use rand::{
 use serde_json::json;
 use simulated_annealing::tsp2::{acceptability, Point, Tsp};
 
+fn generate_circle(n_vertices: usize) -> Vec<Point> {
+    let z = num::Complex::from_polar(1.0, 2.0 * std::f64::consts::PI / n_vertices as f64);
+
+    (0..(n_vertices as i32))
+        .map(|i| z.powi(i))
+        .map(|z| Point(z.re, z.im))
+        .collect()
+}
+
+fn generate_random(n_vertices: usize) -> Vec<Point> {
+    let mut rng = rand::rngs::StdRng::from_entropy();
+
+    let uniform = Uniform::new_inclusive(0.0, 1.0);
+
+    (0..n_vertices)
+        .map(|_| Point(uniform.sample(&mut rng), uniform.sample(&mut rng)))
+        .collect()
+}
+
 async fn handler(ws: WebSocketUpgrade) -> Response {
     ws.on_upgrade(handle_socket)
 }
@@ -20,12 +39,7 @@ async fn handler(ws: WebSocketUpgrade) -> Response {
 async fn handle_socket(mut socket: WebSocket) {
     let n_vertices = 30;
 
-    let z = num::Complex::from_polar(1.0, 2.0 * std::f64::consts::PI / n_vertices as f64);
-
-    let mut state: Vec<_> = (0..n_vertices)
-        .map(|i| z.powi(i))
-        .map(|z| Point(z.re, z.im))
-        .collect();
+    let mut state = generate_random(n_vertices);
 
     let mut rng = rand::rngs::StdRng::from_entropy();
 
