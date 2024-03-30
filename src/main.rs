@@ -77,7 +77,7 @@ async fn handler(ws: WebSocketUpgrade) -> Response {
 }
 
 async fn handle_socket(mut socket: WebSocket) {
-    let n_vertices = 150;
+    let n_vertices = 30;
 
     let mut state = generate_random(n_vertices);
 

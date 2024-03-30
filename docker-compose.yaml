@@ -1,0 +1,17 @@
+services:
+    nginx:
+        image: nginx:1.20.0
+        ports:
+            - "80:80"
+        volumes:
+            - ./nginx.conf:/etc/nginx/nginx.conf
+
+    optimizer:
+        build:
+            context: .
+            dockerfile: ./optimizer.Dockerfile
+
+    plotter:
+        build:
+            context: .
+            dockerfile: ./plotter.Dockerfile

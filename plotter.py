@@ -19,7 +19,7 @@ update_graph = """function(msg) {
 app = Dash()
 app.layout = html.Div(
     [
-        WebSocket(id="ws", url="ws://localhost:3000/ws"),
+        WebSocket(id="ws", url="ws://localhost/ws"),
         dcc.Graph(id="figure", figure=f),
     ]
 )
@@ -29,4 +29,4 @@ app.clientside_callback(
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True, use_reloader=False)
+    app.run(host="0.0.0.0", port="8050", debug=True)
