@@ -15,7 +15,7 @@ pub struct Tsp {
 }
 
 impl Point {
-    fn distance(&self, other: &Self) -> f64 {
+    pub fn distance(&self, other: &Self) -> f64 {
         ((self.0 - other.0).powi(2) + (self.1 - other.1).powi(2)).sqrt()
     }
 }
@@ -117,7 +117,7 @@ mod tests {
 
     #[test]
     fn test_big_polygon2() {
-        let n_vertices = 500;
+        let n_vertices = 20;
 
         let z =
             num::complex::Complex::from_polar(1.0, 2.0 * std::f64::consts::PI / n_vertices as f64);

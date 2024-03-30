@@ -32,6 +32,50 @@ fn generate_random(n_vertices: usize) -> Vec<Point> {
         .collect()
 }
 
+fn geometric_swap<T>(points: &mut [T], i: usize, j: usize) {
+    let (i, j) = (i.min(j), i.max(j));
+    let n = points.len();
+
+    for k in i..j.min(n - (j - i)) {
+        points.swap(k, k + (j - i));
+    }
+
+    if j - i < (n - j) {
+        points[(i + (j - i))..].rotate_left(j - i)
+    } else {
+        points[(i + (n - j))..].rotate_right(n - j)
+    }
+}
+
+fn greedy(mut points: Vec<Point>) -> Vec<Point> {
+    let mut new_order = Vec::new();
+
+    let Some(first) = points.pop() else {
+        return new_order;
+    };
+
+    let mut last_to_be_added = first;
+    new_order.push(first);
+
+    while !points.is_empty() {
+        let (i, point) = points
+            .iter()
+            .enumerate()
+            .min_by(|(_, p1), (_, p2)| {
+                p1.distance(&last_to_be_added)
+                    .partial_cmp(&p2.distance(&last_to_be_added))
+                    .unwrap()
+            })
+            .unwrap();
+
+        new_order.push(*point);
+        last_to_be_added = *point;
+        points.remove(i);
+    }
+
+    new_order
+}
+
 async fn handler(ws: WebSocketUpgrade) -> Response {
     ws.on_upgrade(handle_socket)
 }
@@ -43,7 +87,7 @@ async fn handle_socket(mut socket: WebSocket) {
 
     let mut rng = rand::rngs::StdRng::from_entropy();
 
-    state.shuffle(&mut rng);
+    state = greedy(state);
 
     let uniform = Uniform::new_inclusive(0.0, 1.0);
 
@@ -51,7 +95,7 @@ async fn handle_socket(mut socket: WebSocket) {
     let n = current_state.len();
 
     let mut holder = vec![Point::default(); n];
-    let mut tuple_combs = (0..n).tuple_combinations::<(usize, usize)>().collect_vec();
+    let mut tuple_combs = (1..n).tuple_combinations::<(usize, usize)>().collect_vec();
 
     'outer: for k in 0..5000 {
         let t = 20.0 / k as f64;
@@ -60,10 +104,11 @@ async fn handle_socket(mut socket: WebSocket) {
 
         for (i, j) in tuple_combs.iter() {
             holder.copy_from_slice(current_state);
-            holder.swap(*i, *j);
+            geometric_swap(&mut holder, *i, *j);
 
             if acceptability(current_state, &holder, t) >= uniform.sample(&mut rng) {
                 current_state.copy_from_slice(&holder);
+                eprintln!("Iteration: {}. Swapped: {}, {}", k, i, j);
 
                 let jsonified = json!(Tsp {
                     points: current_state.to_vec(),
@@ -89,4 +134,24 @@ async fn main() {
     // run our app with hyper, listening globally on port 3000
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_geometric_swap() {
+        let mut points = vec![0, 1, 2, 3, 4, 0, 1, 2, 10, 11, 12, 13, 14];
+
+        geometric_swap(&mut points, 5, 8);
+
+        assert_eq!(points, vec![0, 1, 2, 3, 4, 10, 11, 12, 13, 14, 0, 1, 2]);
+
+        let mut points = vec![0, 1, 2, 3, 4, 0, 1, 2, 3, 4, 5, 6, 10, 11, 12];
+
+        geometric_swap(&mut points, 5, 12);
+
+        assert_eq!(points, vec![0, 1, 2, 3, 4, 10, 11, 12, 0, 1, 2, 3, 4, 5, 6]);
+    }
 }
