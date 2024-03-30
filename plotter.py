@@ -29,7 +29,9 @@ update_graph = """function(msg) {
                     'showgrid': false,
                     'zeroline': false,
                     'visible': false
-                    }
+                    },
+                    'width': "880",
+                    'height': "880"
                 }
             }
     };
