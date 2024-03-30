@@ -1,6 +1,6 @@
 services:
     nginx:
-        image: nginx:1.20.0
+        image: nginx:alpine
         ports:
             - "80:80"
         volumes:
