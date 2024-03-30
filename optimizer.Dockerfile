@@ -12,6 +12,6 @@ RUN cargo build --release
 FROM ubuntu
 
 WORKDIR /app
-COPY --from=builder /app/target/release/simulated_annealing .
+COPY --from=builder /app/target/release/main .
 
-CMD [ "./simulated_annealing" ]
+CMD [ "./main" ]
