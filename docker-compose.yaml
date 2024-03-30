@@ -15,3 +15,5 @@ services:
         build:
             context: .
             dockerfile: ./plotter.Dockerfile
+        environment:
+            - PROD=true

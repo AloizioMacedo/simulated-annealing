@@ -1,6 +1,12 @@
 from dash_extensions import WebSocket
 from dash import Dash, html, dcc, Input, Output
 import plotly.express as px
+import os
+
+if os.getenv("PROD", "").lower() == "true":
+    url = "ws://localhost/ws"
+else:
+    url = "ws://localhost:3000/ws"
 
 
 f = px.scatter(x=[1], y=[1])
@@ -19,7 +25,7 @@ update_graph = """function(msg) {
 app = Dash()
 app.layout = html.Div(
     [
-        WebSocket(id="ws", url="ws://localhost/ws"),
+        WebSocket(id="ws", url=url),
         dcc.Graph(id="figure", figure=f),
     ]
 )
