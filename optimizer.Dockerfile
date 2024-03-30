@@ -15,4 +15,3 @@ WORKDIR /app
 COPY --from=builder /app/target/release/simulated_annealing .
 
 CMD [ "./simulated_annealing" ]
-# CMD ["tail", "-f", "/dev/null"]
