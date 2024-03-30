@@ -19,7 +19,20 @@ update_graph = """function(msg) {
     const data = JSON.parse(msg.data);
     data.x.push(data.x[0]);
     data.y.push(data.y[0]);
-    return {data: [{x: data.x, y: data.y, type: "scatter", mode: "markers+lines"}]}};
+    return {data: [{x: data.x, y: data.y, type: "scatter", mode: "markers+lines"}],
+            layout:{'xaxis': {
+                    'showgrid': false,
+                    'zeroline': false,
+                    'visible': false
+                    },
+                    'yaxis': {
+                    'showgrid': false,
+                    'zeroline': false,
+                    'visible': false
+                    }
+                }
+            }
+    };
 """
 
 app = Dash()
