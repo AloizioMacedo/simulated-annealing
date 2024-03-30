@@ -1,0 +1,17 @@
+syntax = "proto3";
+package grpc_sim_ann;
+
+service DataPointsProvider {
+    rpc GetDataPoints (Empty) returns (DataPoints);
+}
+
+message Empty {}
+
+message DataPoints {
+    repeated DataPoint data = 1;
+}
+
+message DataPoint {
+    repeated double x = 1;
+    repeated double y = 2;
+}
