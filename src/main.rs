@@ -77,7 +77,12 @@ async fn handler(ws: WebSocketUpgrade) -> Response {
 }
 
 async fn handle_socket(mut socket: WebSocket) {
-    let n_vertices = 40;
+    let n_vertices: usize = std::env::var("N_VERTICES")
+        .map(|x| {
+            x.parse()
+                .expect("The env variable 'N_VERTICES' should be convertible to integer.")
+        })
+        .unwrap_or(40);
 
     let mut state = generate_random(n_vertices);
 
