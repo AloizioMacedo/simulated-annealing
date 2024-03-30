@@ -74,7 +74,7 @@ async fn handler(ws: WebSocketUpgrade) -> Response {
 }
 
 async fn handle_socket(mut socket: WebSocket) {
-    let n_vertices = 250;
+    let n_vertices = 50;
 
     let mut state = generate_random(n_vertices);
 
@@ -103,7 +103,27 @@ async fn handle_socket(mut socket: WebSocket) {
 
             if acceptability(current_state, &holder, t) >= uniform.sample(&mut rng) {
                 current_state.copy_from_slice(&holder);
-                eprintln!("Iteration: {}. Swapped: {}, {}", k, i, j);
+                eprintln!("Iteration: {}. Swapped Geometrically: {}, {}", k, i, j);
+
+                let (x, y) = current_state.iter().map(|p| (p.0, p.1)).unzip();
+
+                let jsonified = json!(Tsp { x, y });
+
+                socket
+                    .send(axum::extract::ws::Message::Text(jsonified.to_string()))
+                    .await
+                    .unwrap();
+                continue 'outer;
+            }
+        }
+
+        for (i, j) in tuple_combs.iter() {
+            holder.copy_from_slice(current_state);
+            holder.swap(*i, *j);
+
+            if acceptability(current_state, &holder, t) >= uniform.sample(&mut rng) {
+                current_state.copy_from_slice(&holder);
+                eprintln!("Iteration: {}. Swapped Raw: {}, {}", k, i, j);
 
                 let (x, y) = current_state.iter().map(|p| (p.0, p.1)).unzip();
 

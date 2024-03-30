@@ -12,7 +12,10 @@ f.layout.title = "TSP"
 
 app = Dash()
 app.layout = html.Div(
-    [dcc.Graph(id="figure", figure=f), dcc.Interval(id="interval", interval=100)]
+    [
+        dcc.Graph(id="figure", figure=f),
+        dcc.Interval(id="interval", interval=200, n_intervals=2000),
+    ]
 )
 
 
