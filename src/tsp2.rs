@@ -11,7 +11,8 @@ pub struct Point(pub f64, pub f64);
 
 #[derive(Serialize, Deserialize)]
 pub struct Tsp {
-    pub points: Vec<Point>,
+    pub x: Vec<f64>,
+    pub y: Vec<f64>,
 }
 
 impl Point {

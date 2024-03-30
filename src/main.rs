@@ -13,7 +13,7 @@ use rand::{
 use serde_json::json;
 use simulated_annealing::tsp2::{acceptability, Point, Tsp};
 
-fn generate_circle(n_vertices: usize) -> Vec<Point> {
+fn _generate_circle(n_vertices: usize) -> Vec<Point> {
     let z = num::Complex::from_polar(1.0, 2.0 * std::f64::consts::PI / n_vertices as f64);
 
     (0..(n_vertices as i32))
@@ -74,7 +74,7 @@ async fn handler(ws: WebSocketUpgrade) -> Response {
 }
 
 async fn handle_socket(mut socket: WebSocket) {
-    let n_vertices = 30;
+    let n_vertices = 250;
 
     let mut state = generate_random(n_vertices);
 
@@ -92,7 +92,7 @@ async fn handle_socket(mut socket: WebSocket) {
         .tuple_combinations::<(usize, usize)>()
         .collect_vec();
 
-    'outer: for k in 0..3000 {
+    'outer: for k in 0..5000 {
         let t = 1.0 / k as f64;
 
         tuple_combs.shuffle(&mut rng);
@@ -105,9 +105,9 @@ async fn handle_socket(mut socket: WebSocket) {
                 current_state.copy_from_slice(&holder);
                 eprintln!("Iteration: {}. Swapped: {}, {}", k, i, j);
 
-                let jsonified = json!(Tsp {
-                    points: current_state.to_vec(),
-                });
+                let (x, y) = current_state.iter().map(|p| (p.0, p.1)).unzip();
+
+                let jsonified = json!(Tsp { x, y });
 
                 socket
                     .send(axum::extract::ws::Message::Text(jsonified.to_string()))

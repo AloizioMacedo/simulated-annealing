@@ -12,7 +12,7 @@ f.layout.title = "TSP"
 
 app = Dash()
 app.layout = html.Div(
-    [dcc.Graph(id="figure", figure=f), dcc.Interval(id="interval", interval=250)]
+    [dcc.Graph(id="figure", figure=f), dcc.Interval(id="interval", interval=100)]
 )
 
 
@@ -24,7 +24,8 @@ def hello(n_intervals):
     try:
         message = websocket.recv()
         points = json.loads(message)
-        x, y = zip(*points["points"])
+        x = points["x"]
+        y = points["y"]
 
         f = px.scatter(x=x, y=y)
         f.update_traces(mode="markers+lines")
