@@ -91,9 +91,8 @@ async fn handle_socket(mut socket: WebSocket) {
     let n = current_state.len();
 
     let mut holder = vec![Point::default(); n];
-    let mut tuple_combs = (1..(n - 1))
-        .tuple_combinations::<(usize, usize)>()
-        .collect_vec();
+    let mut tuple_combs = (1..n).tuple_combinations::<(usize, usize)>().collect_vec();
+    tuple_combs.retain(|tup| *tup != (1, n - 1));
 
     'outer: for k in 0..5000 {
         let t = 1.0 / k as f64;
