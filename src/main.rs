@@ -2,9 +2,9 @@ use std::time::Duration;
 
 use axum::{
     extract::{ws::WebSocket, WebSocketUpgrade},
-    response::Response,
+    response::{IntoResponse, Response},
     routing::get,
-    Router,
+    Json, Router,
 };
 use itertools::Itertools;
 use rand::{
@@ -76,6 +76,56 @@ async fn handler(ws: WebSocketUpgrade) -> Response {
     ws.on_upgrade(handle_socket)
 }
 
+async fn get_iterations() -> impl IntoResponse {
+    let n_vertices: usize = std::env::var("N_VERTICES")
+        .map(|x| {
+            x.parse()
+                .expect("The env variable 'N_VERTICES' should be convertible to integer.")
+        })
+        .unwrap_or(40);
+
+    let mut state = generate_random(n_vertices);
+
+    let mut rng = rand::rngs::StdRng::from_entropy();
+
+    state = greedy(state);
+
+    let uniform = Uniform::new_inclusive(0.0, 1.0);
+
+    let current_state = &mut state.to_vec();
+    let n = current_state.len();
+
+    let mut holder = vec![Point::default(); n];
+    let mut tuple_combs = (1..n).tuple_combinations::<(usize, usize)>().collect_vec();
+    tuple_combs.retain(|tup| *tup != (1, n - 1));
+
+    let mut results = Vec::new();
+
+    'outer: for k in 0..5000 {
+        let t = 10.0 / (k as f64).powf(1.2);
+
+        tuple_combs.shuffle(&mut rng);
+
+        for (i, j) in tuple_combs.iter() {
+            holder.copy_from_slice(current_state);
+            geometric_swap(&mut holder, *i, *j);
+
+            if acceptability(current_state, &holder, t) >= uniform.sample(&mut rng) {
+                current_state.copy_from_slice(&holder);
+
+                let (x, y) = current_state.iter().map(|p| (p.0, p.1)).unzip();
+
+                results.push(Tsp { x, y });
+                continue 'outer;
+            }
+        }
+
+        break;
+    }
+
+    Json(results)
+}
+
 async fn handle_socket(mut socket: WebSocket) {
     let n_vertices: usize = std::env::var("N_VERTICES")
         .map(|x| {
@@ -132,7 +182,9 @@ async fn handle_socket(mut socket: WebSocket) {
 #[tokio::main]
 async fn main() {
     // build our application with a single route
-    let app = Router::new().route("/ws", get(handler));
+    let app = Router::new()
+        .route("/ws", get(handler))
+        .route("/api/iterations", get(get_iterations));
 
     // run our app with hyper, listening globally on port 3000
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
