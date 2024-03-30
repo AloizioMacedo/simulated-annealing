@@ -100,7 +100,7 @@ async fn handle_socket(mut socket: WebSocket) {
     tuple_combs.retain(|tup| *tup != (1, n - 1));
 
     'outer: for k in 0..5000 {
-        let t = 1.0 / k as f64;
+        let t = 10.0 / (k as f64).powf(1.2);
 
         tuple_combs.shuffle(&mut rng);
 
