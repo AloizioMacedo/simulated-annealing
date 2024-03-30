@@ -148,13 +148,13 @@ mod tests {
 
         let error = (best_energy - final_state.energy()).abs();
 
-        // if error > 0.0001 {
-        //     panic!(
-        //         "error of {error} from final_state energy '{}' to '{}'. States are: {:?}",
-        //         final_state.energy(),
-        //         best_energy,
-        //         final_state.state,
-        //     )
-        // }
+        if error > 0.0001 {
+            panic!(
+                "error of {error} from final_state energy '{}' to '{}'. States are: {:?}",
+                final_state.energy(),
+                best_energy,
+                final_state.state,
+            )
+        }
     }
 }
