@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use axum::{
     extract::{ws::WebSocket, WebSocketUpgrade},
     response::Response,
@@ -12,6 +14,7 @@ use rand::{
 };
 use serde_json::json;
 use simulated_annealing::tsp2::{acceptability, Point, Tsp};
+use tokio::time::sleep;
 
 fn _generate_circle(n_vertices: usize) -> Vec<Point> {
     let z = num::Complex::from_polar(1.0, 2.0 * std::f64::consts::PI / n_vertices as f64);
@@ -74,7 +77,7 @@ async fn handler(ws: WebSocketUpgrade) -> Response {
 }
 
 async fn handle_socket(mut socket: WebSocket) {
-    let n_vertices = 50;
+    let n_vertices = 150;
 
     let mut state = generate_random(n_vertices);
 
@@ -113,26 +116,8 @@ async fn handle_socket(mut socket: WebSocket) {
                     .send(axum::extract::ws::Message::Text(jsonified.to_string()))
                     .await
                     .unwrap();
-                continue 'outer;
-            }
-        }
 
-        for (i, j) in tuple_combs.iter() {
-            holder.copy_from_slice(current_state);
-            holder.swap(*i, *j);
-
-            if acceptability(current_state, &holder, t) >= uniform.sample(&mut rng) {
-                current_state.copy_from_slice(&holder);
-                eprintln!("Iteration: {}. Swapped Raw: {}, {}", k, i, j);
-
-                let (x, y) = current_state.iter().map(|p| (p.0, p.1)).unzip();
-
-                let jsonified = json!(Tsp { x, y });
-
-                socket
-                    .send(axum::extract::ws::Message::Text(jsonified.to_string()))
-                    .await
-                    .unwrap();
+                sleep(Duration::from_millis(10)).await;
                 continue 'outer;
             }
         }
