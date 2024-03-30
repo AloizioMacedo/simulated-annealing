@@ -6,7 +6,7 @@ use rand::{
 };
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Copy, Serialize, Deserialize, PartialEq)]
 pub struct Point(pub f64, pub f64);
 
 #[derive(Serialize, Deserialize)]

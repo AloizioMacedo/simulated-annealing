@@ -34,17 +34,10 @@ fn generate_random(n_vertices: usize) -> Vec<Point> {
 
 fn geometric_swap<T>(points: &mut [T], i: usize, j: usize) {
     let (i, j) = (i.min(j), i.max(j));
-    let n = points.len();
 
-    for k in i..j.min(n - (j - i)) {
-        points.swap(k, k + (j - i));
-    }
+    points.swap(i, j);
 
-    if j - i < (n - j) {
-        points[(i + (j - i))..].rotate_left(j - i)
-    } else {
-        points[(i + (n - j))..].rotate_right(n - j)
-    }
+    points[(i + 1)..j].reverse();
 }
 
 fn greedy(mut points: Vec<Point>) -> Vec<Point> {
@@ -95,10 +88,12 @@ async fn handle_socket(mut socket: WebSocket) {
     let n = current_state.len();
 
     let mut holder = vec![Point::default(); n];
-    let mut tuple_combs = (1..n).tuple_combinations::<(usize, usize)>().collect_vec();
+    let mut tuple_combs = (1..(n - 1))
+        .tuple_combinations::<(usize, usize)>()
+        .collect_vec();
 
-    'outer: for k in 0..5000 {
-        let t = 20.0 / k as f64;
+    'outer: for k in 0..3000 {
+        let t = 1.0 / k as f64;
 
         tuple_combs.shuffle(&mut rng);
 
@@ -138,6 +133,8 @@ async fn main() {
 
 #[cfg(test)]
 mod tests {
+    use simulated_annealing::tsp2::energy;
+
     use super::*;
 
     #[test]
@@ -146,12 +143,41 @@ mod tests {
 
         geometric_swap(&mut points, 5, 8);
 
-        assert_eq!(points, vec![0, 1, 2, 3, 4, 10, 11, 12, 13, 14, 0, 1, 2]);
+        assert_eq!(points, vec![0, 1, 2, 3, 4, 10, 2, 1, 0, 11, 12, 13, 14]);
 
         let mut points = vec![0, 1, 2, 3, 4, 0, 1, 2, 3, 4, 5, 6, 10, 11, 12];
 
         geometric_swap(&mut points, 5, 12);
 
-        assert_eq!(points, vec![0, 1, 2, 3, 4, 10, 11, 12, 0, 1, 2, 3, 4, 5, 6]);
+        assert_eq!(points, vec![0, 1, 2, 3, 4, 10, 6, 5, 4, 3, 2, 1, 0, 11, 12]);
+    }
+
+    #[test]
+    fn test_greedy() {
+        let correct_order = vec![
+            Point(0.0, 0.0),
+            Point(0.0, 1.0),
+            Point(0.0, 2.0),
+            Point(1.0, 2.0),
+            Point(2.0, 2.0),
+            Point(2.0, 1.0),
+            Point(2.0, 0.0),
+            Point(1.0, 0.0),
+        ];
+
+        let unordered = vec![
+            Point(0.0, 0.0),
+            Point(2.0, 1.0),
+            Point(0.0, 2.0),
+            Point(1.0, 2.0),
+            Point(2.0, 0.0),
+            Point(0.0, 1.0),
+            Point(1.0, 0.0),
+            Point(2.0, 2.0),
+        ];
+
+        let ordered = greedy(unordered);
+
+        assert_eq!(energy(&ordered), energy(&correct_order));
     }
 }
